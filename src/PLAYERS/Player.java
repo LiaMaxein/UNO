@@ -2,7 +2,6 @@ package PLAYERS;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack; // we need Stack for the Deck
 import CARDS.Card; // brauchen wir dann eigentlich nicht, oder?
 
 /* and the players gonna hate hate hate hate hate
@@ -11,34 +10,27 @@ import CARDS.Card; // brauchen wir dann eigentlich nicht, oder?
 
 public class Player {
 
+    // muss es nochmal überarbeiten:
+    /* es wäre wohl besser private int roundPoints = 0;
+    und dann nochmal die private int totalScore = 0 // Gesamte Punkte über alle Runden */
     private String name;
     private boolean isBot = false; // standardmäßig auf false setzen, dann muss man beim Erstellen von menschlichen Spielern nichts extra machen
     private List<Card> hand; // jeder Spieler hat eigene Handkarten
-    private int score = 0; // zum mitracken der Punkte
+
+    // Punkteverwaltung
+    private int currentRoundPoints; // Punkte in der aktuellen Runde
+    private int currentGamePoints;  // Punkte im aktuellen Spiel
+
 
     // Constructor für Standard-Spieler: kein Bot, Score = 0, leere Hand
     public Player(String name) {
         this.name = name;
         this.isBot = false; // by default
-        this.score = 0;     // by default
         this.hand = new ArrayList<>();
+        this.currentRoundPoints = 0; // Punkte der aktuellen Runde starten bei 0
+        this.currentGamePoints = 0;  // Punkte des aktuellen Spiels starten bei 0
     }
 
-    // Constructor für Bot-Spieler
-    public Player(String name, boolean isBot) {
-        this.name = name;
-        this.isBot = true;
-        this.score = 0;
-        this.hand = new ArrayList<>();
-    }
-
-    // Constructor für einen Spieler mit Punktestand aus der Datenbanke oder oder
-    public Player(String name, boolean isBot, int score) {
-        this.name = name;
-        this.isBot = false;
-        this.score = score;
-        this.hand = new ArrayList<>();
-    }
 
     // Getter
     public String getName() {
@@ -53,45 +45,66 @@ public class Player {
         return hand;
     }
 
-    public int getScore() {
-        return score;
+    public int getCurrentRoundPoints() {
+        return currentRoundPoints;
     }
 
-    // Setter
-    public void setName(String name) {
-        this.name = name;
+    public int getCurrentGamePoints() {
+        return currentGamePoints;
     }
 
-    public void setBot(boolean bot) {
-        isBot = bot;
-    }
+    // ----- Methodem zum Verwalten der Karten "auf der Hand":
 
-    public void setHand(List<Card> hand) {
-        this.hand = hand;
-    }
-
-    public void setScore(int score) {
-        this.score = score;
-    }
-
-    // Methode: erhöht den Punktestand um die übergebene Punktzahl
-    public void addPoints(int points) {
-        this.score += points;
-    }
-
-    // Methode: Spieler zieht eine Karte vom Nachziehstapel
+    // Eine Karte auf die Hand nehmen
     public void drawCard(Card card) {
-        hand.add(card);
+        this.hand.add(card);
     }
 
-    // Methode: entfernt eine Karte aus der Hand & legt diese auf den Ablagestapel
+    // Eine Karte von der Hand spielen
     public void playCard(Card card) {
-        hand.remove(card);
+        this.hand.remove(card);
     }
 
-    // Methode: prüft ob der Spieler nur noch eine Karte hat
-    // vllt. ist das falsch hier, ich weiß es gerade nicht
+
+    // ----- Methodem zum Verwalten der Punkte
+    // Punkte zur aktuellen Runde hinzufügen
+    public void addPointsToRound(int points) {
+        this.currentRoundPoints += points;
+    }
+
+    // Beendet die aktuelle Runde und addiert die Rundenpunkte zu den Spielpunkten
+    public void endRound() {
+        this.currentGamePoints += this.currentRoundPoints; // Rundenpunkte zum Spiel addieren
+        this.currentRoundPoints = 0; // Rundenpunkte für die nächste Runde zurücksetzen
+    }
+
+    // Beendet das aktuelle Spiel und setzt die Spielpunkte zurück
+    public void endGame() {
+        // Die Spielpunkte werden nur zurückgesetzt, da kein globaler Highscore gespeichert wird
+        this.currentGamePoints = 0; // Spielpunkte für das nächste Spiel zurücksetzen
+        // Hinweis: Es wird kein persönlicher Highscore über alle Spiele hinweg gespeichert.
+        // Dieser Wert ist nur für die Dauer des aktuellen Programmlaufs gültig.
+    }
+
+
+    // Zeigt den aktuellen Punktestand des Spielers an.
+    // Gibt die Punkte der aktuellen Runde und die Gesamtpunkte
+    // des aktuellen Spiels aus:
+    public void showScore() {
+        System.out.println(name + " – Rundenpunkte: " + currentRoundPoints + ", Gesamtpunkte im Spiel: " + currentGamePoints);
+    }
+
+
+    //Prüft ob der Spieler nur noch eine Karte auf der hand hat
+    // wichtig für die UNO-Regel
+    // @return true, wenn der Spieler genau eine Karte hat, sonst false.
     public boolean hasUNO() {
         return hand.size() == 1;
     }
+
+    // Methode, um die Hand des Spielers zu überprüfen (für Debugging oder Anzeige)
+    public void showHand() {
+        System.out.println(getName() + "'s Hand: " + hand);
+    }
+
 }
